@@ -1,0 +1,15 @@
+{
+  "name": "TTE Mischer Einstellhilfe",
+  "short_name": "TTE Einstellhilfe",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f4f4",
+  "theme_color": "#004080",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}
