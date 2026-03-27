@@ -2,10 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TTE Regler Einstellhilfe</title>
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-<link rel="manifest" href="manifest.json">
+<title>CAN Hotlink Generator</title>
 
 <style>
     body {
@@ -22,14 +19,9 @@
         max-width: 900px;
     }
 
-    h1, h2 {
-        color: #2c3e50;
+    h2 {
         margin-top: 0;
-    }
-
-    h6 {
-        margin-top: -10px;
-        color: #7f8c8d;
+        color: #2c3e50;
     }
 
     .card {
@@ -40,26 +32,24 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
-    label {
-        font-weight: 600;
-        display: block;
-        margin-top: 15px;
-    }
-
-    input[type="number"], input[type="checkbox"], input[type="range"] {
-        margin-top: 8px;
-        padding: 10px;
-        font-size: 15px;
+    textarea {
+        width: 100%;
+        height: 160px;
+        padding: 12px;
         border-radius: 6px;
         border: 1px solid #ccc;
-        width: 100%;
-        box-sizing: border-box;
+        font-size: 14px;
+        resize: vertical;
+        font-family: Consolas, monospace;
     }
 
-    input[type="checkbox"] {
-        width: auto;
-        transform: scale(1.2);
-        margin-left: 5px;
+    pre {
+        background: #eef1f5;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        white-space: pre-wrap;
+        border: 1px solid #d0d7e1;
     }
 
     button {
@@ -70,7 +60,7 @@
         border-radius: 6px;
         font-size: 14px;
         cursor: pointer;
-        margin-top: 20px;
+        margin-right: 10px;
         transition: background 0.2s ease;
     }
 
@@ -78,27 +68,18 @@
         background: #2980b9;
     }
 
-    .slider-container {
-        margin-top: 25px;
+    button.secondary {
+        background: #7f8c8d;
     }
 
-    .slider {
-        width: 100%;
+    button.secondary:hover {
+        background: #636e72;
     }
 
-    .result {
-        margin-top: 20px;
-        background: #eef1f5;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #d0d7e1;
-    }
-
-    small {
-        color: #7f8c8d;
-        display: block;
-        margin-top: -10px;
-        margin-bottom: 15px;
+    hr {
+        margin: 40px 0;
+        border: none;
+        border-top: 1px solid #d0d7e1;
     }
 </style>
 </head>
@@ -107,93 +88,137 @@
 <div class="container">
 
     <div class="card">
-        <h2>TTE FW Regler Primär-Mischer-Einstellhilfe</h2>
-        <h6>Experimentell Version 0.4</h6>
-        <label for="laufzeit">Mischerlaufzeit (in Sekunden):</label>
-        <input type="number" id="laufzeit" placeholder="z. B. 120" min="1">
-        <label for="nominalDurchfluss">Ventildurchfluss (m³/h):</label>
-        <input type="number" id="nominalDurchfluss" placeholder="z. B. 8" min="0.1">
-        <label for="installiertDurchfluss">Gedrosselter Durchfluss (m³/h):</label>
-        <input type="number" id="installiertDurchfluss" placeholder="z. B. 2" min="0.1">
-        <label for="experimentell">Experimentelle Funktionen aktivieren:</label>
-        <input type="checkbox" id="experimentell" onchange="berechneWerte()">
-        <button onclick="berechneWerte()">Berechnen</button>
+        <h2>CAN Hotlink Generator</h2>
+        <p>Füge hier deine DataPoint-Pfade ein (jeweils eine Zeile):</p>
+        <textarea id="input"></textarea>
 
-        <div class="slider-container">
-            <label for="traegheit">Trägheitsfaktor: <span id="traegheitWert">0</span></label>
-            <input type="range" id="traegheit" class="slider" min="-3" max="3" step="0.1" value="0" onchange="updateTraegheitWert()">
-        </div>
+        <br><br>
+        <button onclick="generate()">Hotlinks erzeugen</button>
+        <button class="secondary" onclick="copyOutput()">In Zwischenablage kopieren</button>
 
-        <div class="result" id="ergebnis" style="display:none;">
-            <h2>Empfohlene Einstellungen:</h2>
-            <p><strong>07-024 Mischerlaufzeit:</strong> <span id="mischerLaufzeit"></span> s</p>
-            <small>(Laufzeit des Ventiles in Sekunden. Die Laufzeit muss für die Ventilberechnung exakt eingestellt werden.)</small>
-            <p><strong>07-022 Laufzeit Regler:</strong> <span id="reglerLaufzeit"></span> s</p>
-            <small>(Laufzeit des Mischer-Regelkreises. Beispiel: Die Laufzeit des Motors beträgt 120 Sekunden. Der eingestellte Wert 30 ist dann ¼ der gesamten Laufzeit, somit wird die Berechnung alle 30 Sekunden durchgeführt. Der eingestellte Wert sollte üblicherweise immer ¼ der Gesamtlaufzeit betragen.)</small>
-            <p><strong>07-020 Nachstellzeit:</strong> <span id="nachstellzeit"></span> s</p>
-            <small>(Parameter für den Integralteil der Mischerregelung des angegebenen Heizkreises. Die Nachstellzeit ist jene Zeit (in Sekunden) in der eine gegebene Soll-Ist-Differenz den gleichen Effekt auf den Mischer haben soll wie eine gleich grosse Proportional-Abweichung.)</small>
-            <p><strong>07-021 P-Band:</strong> <span id="pband"></span> K</p>
-            <small>(Parameter für den Proportionalteil der Mischerregelung für den angegebenen Heizkreis. Das P-Band ist jene Temperaturänderung die einen Vollausschlag (= 100 % Laufzeit) auf den Mischer haben soll.)</small>
-        </div>
+        <h3>Ergebnis:</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <div class="card">
+        <h2>Hotlinks prüfen (Duplikate entfernen)</h2>
+        <p>Füge hier deine Hotlinks ein:</p>
+        <textarea id="checkInput"></textarea>
+
+        <br><br>
+        <button onclick="checkDuplicates()">Prüfen & bereinigen</button>
+        <button class="secondary" onclick="copyClean()">Bereinigte Liste kopieren</button>
+
+        <h3>Duplikate:</h3>
+        <pre id="duplicates"></pre>
+
+        <h3>Bereinigte Liste:</h3>
+        <pre id="cleanOutput"></pre>
     </div>
 
 </div>
 
-    <script>
-        let traegheitFaktor = 0;
+<script>
+function extractCAN(str) {
+    const match = str.match(/installation\.(.*?)$/);
+    if (!match) return "";
 
-        function updateTraegheitWert() {
-            traegheitFaktor = parseFloat(document.getElementById('traegheit').value);
-            document.getElementById('traegheitWert').textContent = traegheitFaktor;
-            berechneWerte();
-        }
+    const parts = match[1].split(".");
+    const result = [];
 
-        function berechneWerte() {
-            const laufzeit = parseFloat(document.getElementById('laufzeit').value);
-            if (isNaN(laufzeit) || laufzeit <= 0) {
-                alert("Bitte eine gültige Zahl für die Mischerlaufzeit eingeben.");
-                return;
-            }
-
-            // Durchfluss-Skalierung
-            let nominal = parseFloat(document.getElementById('nominalDurchfluss').value);
-            let installiert = parseFloat(document.getElementById('installiertDurchfluss').value);
-            let skalierung = 1;
-            if (!isNaN(nominal) && !isNaN(installiert) && nominal > 0 && installiert > 0) {
-                skalierung = installiert / nominal;
-                if (skalierung > 1) skalierung = 1;
-            }
-
-            // Zusatzfaktor für Reglerlaufzeit
-            let zusatzFaktor = 0;
-            if (skalierung < 1) {
-                zusatzFaktor = -1 * (1 - skalierung) / 0.75;
-            }
-            const angepassterTraegheit = traegheitFaktor + zusatzFaktor;
-
-            // Berechnung für 07-022 Laufzeit Regler
-            const reglerLaufzeit = Math.round(laufzeit / 4 + 10 * angepassterTraegheit);
-
-            // Experimentelle Funktionen
-            let nachstellzeit, pBand;
-            const experimentell = document.getElementById('experimentell').checked;
-            if (experimentell) {
-                // Dynamische Berechnung
-                nachstellzeit = Math.round(40 + 10 * angepassterTraegheit * (1 / skalierung));
-                pBand = (laufzeit / 20 + 6 * skalierung).toFixed(1);
+    parts.forEach(p => {
+        const m = p.match(/^(\d+)(?:\.(\d+))?_/);
+        if (m) {
+            if (m[2]) {
+                result.push(m[1] + "." + m[2]);
             } else {
-
-                nachstellzeit = 40;
-                pBand = 40;
+                result.push(m[1]);
             }
-
-            // Ergebnisse anzeigen
-            document.getElementById('mischerLaufzeit').textContent = laufzeit;
-            document.getElementById('reglerLaufzeit').textContent = reglerLaufzeit;
-            document.getElementById('nachstellzeit').textContent = nachstellzeit;
-            document.getElementById('pband').textContent = pBand;
-            document.getElementById('ergebnis').style.display = 'block';
         }
-    </script>
+    });
+
+    return result.join(".");
+}
+
+function generate() {
+    const lines = document.getElementById("input").value.trim().split("\n");
+    const hotlinks = new Set();
+
+    lines.forEach(line => {
+        const hl = extractCAN(line);
+        if (hl) hotlinks.add(hl);
+    });
+
+    const sorted = [...hotlinks].sort((a, b) => {
+        const aa = a.split(".").map(Number);
+        const bb = b.split(".").map(Number);
+        for (let i = 0; i < Math.max(aa.length, bb.length); i++) {
+            if ((aa[i] || 0) !== (bb[i] || 0)) return (aa[i] || 0) - (bb[i] || 0);
+        }
+        return 0;
+    });
+
+    document.getElementById("output").textContent = ";" + sorted.join(";");
+}
+
+function copyOutput() {
+    const text = document.getElementById("output").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Hotlinks kopiert!");
+    });
+}
+
+function checkDuplicates() {
+    const input = document.getElementById("checkInput").value;
+
+    const items = input.split(";").map(i => i.trim()).filter(i => i);
+
+    const seen = new Set();
+    const duplicates = new Set();
+    const unique = [];
+
+    items.forEach(item => {
+        if (seen.has(item)) {
+            duplicates.add(item);
+        } else {
+            seen.add(item);
+            unique.push(item);
+        }
+    });
+
+    const sortFunc = (a, b) => {
+        const aa = a.split(".").map(Number);
+        const bb = b.split(".").map(Number);
+        for (let i = 0; i < Math.max(aa.length, bb.length); i++) {
+            if ((aa[i] || 0) !== (bb[i] || 0)) {
+                return (aa[i] || 0) - (bb[i] || 0);
+            }
+        }
+        return 0;
+    };
+
+    const sortedUnique = [...unique].sort(sortFunc);
+    const sortedDuplicates = [...duplicates].sort(sortFunc);
+
+    document.getElementById("duplicates").textContent =
+        sortedDuplicates.length ? sortedDuplicates.join(";") : "Keine Duplikate";
+
+    document.getElementById("cleanOutput").textContent =
+        sortedUnique.join(";");
+}
+
+function copyClean() {
+    const text = document.getElementById("cleanOutput").textContent;
+    if (!text) {
+        alert("Keine bereinigte Liste vorhanden!");
+        return;
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Bereinigte Liste kopiert!");
+    });
+}
+</script>
+
 </body>
 </html>
