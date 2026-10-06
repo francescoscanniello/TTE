@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 
 <style>
-:root {
+:root  {
 	--bg: #f4f7fb;
 	--surface: #ffffff;
 	--surface-2: #f8fafc;
@@ -22,7 +22,7 @@
 	--radius: 14px;
 }
 
-:root.dark {
+:root.dark  {
 	--bg: #0f172a;
 	--surface: #172033;
 	--surface-2: #111a2c;
@@ -35,36 +35,34 @@
 	--shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
 }
 
-* {
+*  {
 	box-sizing: border-box;
 }
 
-body {
+body  {
 	margin: 0;
 	font-family: Inter, "Segoe UI", Arial, sans-serif;
 	background: var(--bg);
 	color: var(--text);
 }
 
-.container {
+.container  {
 	width: 100%;
 	max-width: 900px;
 	margin: 0 auto;
 	padding: 24px;
 }
 
-h1,
-h2 {
+h1, h2  {
 	color: var(--text);
 	margin-top: 0;
 }
 
-h6,
-small {
+h6, small  {
 	color: var(--muted);
 }
 
-.card {
+.card  {
 	background: var(--surface);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
@@ -73,7 +71,7 @@ small {
 	margin-bottom: 18px;
 }
 
-label {
+label  {
 	display: block;
 	font-size: 12px;
 	font-weight: 700;
@@ -81,11 +79,7 @@ label {
 	margin: 12px 0 6px;
 }
 
-input[type="number"],
-input[type="text"],
-input[type="range"],
-select,
-textarea {
+input[type="number"], input[type="text"], input[type="range"], select, textarea  {
 	width: 100%;
 	border: 1px solid var(--border);
 	background: var(--surface);
@@ -95,19 +89,15 @@ textarea {
 	outline: none;
 }
 
-input[type="number"]:focus,
-input[type="text"]:focus,
-input[type="range"]:focus,
-select:focus,
-textarea:focus {
+input[type="number"]:focus, input[type="text"]:focus, input[type="range"]:focus, select:focus, textarea:focus  {
 	border-color: var(--primary);
 }
 
-input[type="checkbox"] {
+input[type="checkbox"]  {
 	accent-color: var(--primary);
 }
 
-button {
+button  {
 	padding: 9px 13px;
 	border-radius: 9px;
 	cursor: pointer;
@@ -117,30 +107,21 @@ button {
 	transition: 0.16s;
 }
 
-button:hover {
+button:hover  {
 	border-color: var(--primary);
-	transform: translatey(-1px);
+	transform: translateY(-1px);
 }
 
-.btn-primary {
-	background: var(--primary);
-	color: #fff;
-	border-color: var(--primary);
-}
-
-.btn-primary:hover {
-	background: var(--primary-dark);
-}
-
-.slider-container {
+.slider-container  {
 	margin-top: 24px;
 }
 
-.slider {
+.slider  {
 	width: 100%;
+	accent-color: var(--primary);
 }
 
-.result {
+.result  {
 	margin-top: 18px;
 	padding: 16px;
 	background: var(--surface-2);
@@ -148,26 +129,27 @@ button:hover {
 	border-radius: 10px;
 }
 
-.result-value {
+.result-value  {
 	font-size: 22px;
 	font-weight: 700;
 	color: var(--primary);
 }
 
-.result-value.hex {
+.result-value.hex  {
 	font-family: Consolas, monospace;
 }
 
-.switch-row {
+.switch-row  {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
 }
 
-.switch {
+.switch  {
 	appearance: none;
 	width: 42px;
+	min-width: 42px;
 	height: 24px;
 	border-radius: 20px;
 	background: #cbd5e1;
@@ -175,7 +157,7 @@ button:hover {
 	cursor: pointer;
 }
 
-.switch::after {
+.switch::after  {
 	content: "";
 	position: absolute;
 	top: 3px;
@@ -187,41 +169,91 @@ button:hover {
 	transition: 0.2s;
 }
 
-.switch:checked {
+.switch:checked  {
 	background: var(--primary);
 }
 
-.switch:checked::after {
+.switch:checked::after  {
 	left: 21px;
+}
+
+.btn-primary  {
+	background: var(--primary);
+	color: #fff;
+	border: 1px solid var(--primary);
+}
+
+.btn-primary:hover  {
+	background: var(--primary-dark);
+}
+
+@media (max-width: 650px)  {
+	.header-bar  {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start !important;
+		gap: 12px;
+	}
+
+	.header-bar button  {
+		width: 100%;
+	}
+
 }
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-	<div style="display:flex;justify-content:flex-end;margin-bottom:15px;">
-		<button onclick="toggleDarkMode()" id="themeBtn">
-			🌙 Dark Mode
-		</button>
-	</div>
-    
+    <div class="header-bar"
+         style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+
+        <div>
+            <h1 style="margin:0;">TTE Regler Einstellhilfe</h1>
+            <div style="color:var(--muted);font-size:13px;">
+                Primär-Mischer-Einstellhilfe · Version 0.5
+            </div>
+        </div>
+
+        <button onclick="toggleDarkMode()" id="themeBtn">
+            🌙 Dark Mode
+        </button>
+
+    </div>
+
     <div class="card">
-        <h2>TTE FW Regler Primär-Mischer-Einstellhilfe</h2>
-        <h6>Experimentell Version 0.5</h6>
         <label for="laufzeit">Mischerlaufzeit (in Sekunden):</label>
         <input type="number" id="laufzeit" placeholder="z. B. 120" min="1">
         <label for="nominalDurchfluss">Ventildurchfluss (m³/h):</label>
         <input type="number" id="nominalDurchfluss" placeholder="z. B. 8" min="0.1">
         <label for="installiertDurchfluss">Gedrosselter Durchfluss (m³/h):</label>
         <input type="number" id="installiertDurchfluss" placeholder="z. B. 2" min="0.1">
-        <label for="experimentell">Experimentelle Funktionen aktivieren:</label>
-        <input type="checkbox" id="experimentell" onchange="berechneWerte()">
-        <button onclick="berechneWerte()">Berechnen</button>
+		<div class="switch-row" style="margin-top:15px;">
+			<label style="margin:0;">
+			Experimentelle Funktionen
+			</label>
+			<input
+				type="checkbox"
+				id="experimentell"
+				class="switch"
+				onchange="berechneWerte()">
+		</div>
+		<button class="btn-primary" onclick="berechneWerte()">
+		Berechnen
+		</button>
 
         <div class="slider-container">
             <label for="traegheit">Trägheitsfaktor: <span id="traegheitWert">0</span></label>
-            <input type="range" id="traegheit" class="slider" min="-3" max="3" step="0.1" value="0" onchange="updateTraegheitWert()">
+            <input type="range"
+			   id="traegheit"
+			   class="slider"
+			   min="-3"
+			   max="3"
+			   step="0.1"
+			   value="0"
+			   oninput="updateTraegheitWert()">
         </div>
 
         <div class="result" id="ergebnis" style="display:none;">
